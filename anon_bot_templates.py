@@ -1,5 +1,25 @@
 from config import bot_url
 
+def templateMessageGetStats(data) -> str:
+    return f'👉Полученные: {data["incoming"]}\n' \
+           f'👈Отправленные: {data["outcoming"]}\n' \
+           f'Баланс: ...\n'
+
+
+def templateMessageReferralLink(message) -> str:
+    return f'Твоя реферальная ссылка:\n' \
+           f'\n' \
+           f't.me/{bot_url}?referral={message.chat.id}\n'
+
+
+def templateMessageDeanonLink() -> str:
+    return f'[Смотреть от кого приходят валентинки можно через бота](http://t.me/deanon_your_valentines_bot)'
+
+
+def templateMessageReferralLink(message, ) -> str:
+    return f'Твоя реферальная ссылка:\n' \
+           f'\n' \
+           f't.me/{bot_url}?referral={message.chat.id}\n'
 
 def templateMessageFrom(message) -> str:
     return f'Готово, твое сообщение отправлено!\n' \
@@ -13,14 +33,15 @@ def templateMessageFrom(message) -> str:
 
 
 def templateMessageTo() -> str:
-    return f'У вас новое признание:\n'
+    return f'[У вас новое признание:](http://t.me/deanon_your_valentines_bot)\n '
+
 
 def templateMessageToWithText(message) -> str:
-    return f'У вас новое признание:\n\n*{message.text}*'
+    return f'[У вас новое признание:](http://t.me/deanon_your_valentines_bot)\n\n*{message.text}* '
 
 
 def templateMessageToWithCaption(message) -> str:
-    return f'У вас новое признание:\n\n*{message.caption}*'
+    return f'[У вас новое признание:](http://t.me/deanon_your_valentines_bot)\n\n*{message.caption}* '
 
 
 def templateMessageStartByLink() -> str:

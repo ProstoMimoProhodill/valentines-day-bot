@@ -83,3 +83,10 @@ def saveMessageVideoNote(message, user_from, user_to):
                      )
     db.session.add(msg)
     db.session.commit()
+
+
+def countIncomingMessagesByUserId(id) -> int:
+    return db.session.query(Message).filter_by(id_to=id).count()
+
+def countOutcomingMessagesByUserId(id) -> int:
+    return db.session.query(Message).filter_by(id_from=id).count()

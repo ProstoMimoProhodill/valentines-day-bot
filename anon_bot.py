@@ -30,6 +30,33 @@ def main():
         sys.exit(0)
 
     bot = telebot.TeleBot(token, state_storage=StateMemoryStorage())
+    bot.set_my_commands([
+        telebot.types.BotCommand('/stats', 'My stats📈'),
+        telebot.types.BotCommand('/deanon', 'Deanon🔎'),
+        telebot.types.BotCommand('/referral', 'Referral program🚀'),
+        telebot.types.BotCommand('/incoming', 'Incoming valentines💕')
+    ])
+
+    @bot.message_handler(commands=['stats'])
+    def getDeanonLink(message):
+        data = {
+            'incoming': countIncomingMessagesByUserId(message.from_user.id),
+            'outcoming': countOutcomingMessagesByUserId(message.from_user.id)
+        }
+        bot.send_message(message.chat.id, templateMessageGetStats(data), parse_mode='Markdown')
+
+    @bot.message_handler(commands=['deanon'])
+    def getDeanonLink(message):
+        bot.send_message(message.chat.id, templateMessageDeanonLink(), parse_mode='Markdown')
+
+    @bot.message_handler(commands=['referral'])
+    def getReferralLink(message):
+        bot.send_message(message.chat.id, templateMessageReferralLink(message))
+
+    @bot.message_handler(commands=['incoming'])
+    def getReferralLink(message):
+        # TODO
+        bot.send_message(message.chat.id, templateMessageReferralLink(message))
 
     @bot.message_handler(commands=['start'],
                          func=lambda msg: len(msg.text.split()) == 1)
@@ -38,7 +65,7 @@ def main():
         bot.send_message(message.chat.id, templateMessageStart(message))
 
     @bot.message_handler(commands=['start'],
-                         func=lambda msg: len(msg.text.split()) > 1)
+                         func=lambda msg: len(msg.text.split()) == 2)
     def startByLink(message):
         saveUser(message)
         id_to = message.text.split()[1]
@@ -67,7 +94,7 @@ def main():
             saveMessageSticker(message, data['user_from'], data['user_to'])
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
-            bot.send_message(data['user_to'], templateMessageTo())
+            bot.send_message(data['user_to'], templateMessageTo(), parse_mode='Markdown')
             bot.send_sticker(data['user_to'], message.sticker.file_id)
         bot.delete_state(message.from_user.id, message.chat.id)
 
@@ -127,7 +154,7 @@ def main():
                 voice.write(file)
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
-            bot.send_message(data['user_to'], templateMessageTo())
+            bot.send_message(data['user_to'], templateMessageTo(), parse_mode='Markdown')
             bot.send_voice(data['user_to'], message.voice.file_id)
         bot.delete_state(message.from_user.id, message.chat.id)
 
@@ -145,7 +172,7 @@ def main():
                 video_note.write(file)
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
-            bot.send_message(data['user_to'], templateMessageTo())
+            bot.send_message(data['user_to'], templateMessageTo(), parse_mode='Markdown')
             bot.send_video_note(data['user_to'], message.video_note.file_id)
         bot.delete_state(message.from_user.id, message.chat.id)
 

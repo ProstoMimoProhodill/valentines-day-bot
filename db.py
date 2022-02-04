@@ -122,4 +122,5 @@ def createTables():
 # generatePayments(session)
 # showPayments(session)
 
-
+# for msg in session.query(Message).filter_by(id_to=437499696).count():
+#     print(f'{msg.id} {msg.id_from} {msg.id_to} {msg.text} {msg.media} {msg.is_delivered} {msg.date}')
