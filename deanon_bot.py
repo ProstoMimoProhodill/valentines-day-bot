@@ -42,3 +42,6 @@ def main():
         print(message)
 
     bot.infinity_polling()
+
+if __name__ == '__main__':
+    main()
