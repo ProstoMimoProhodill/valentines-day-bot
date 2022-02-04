@@ -15,6 +15,9 @@ def templateMessageFrom(message) -> str:
 def templateMessageTo() -> str:
     return f'У вас новое признание:\n'
 
+def templateMessageToWithText(message) -> str:
+    return f'У вас новое признание:\n\n*{message.text}*'
+
 
 def templateMessageToWithCaption(message) -> str:
     return f'У вас новое признание:\n\n*{message.caption}*'

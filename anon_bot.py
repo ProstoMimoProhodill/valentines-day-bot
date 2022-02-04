@@ -1,24 +1,35 @@
 import sys
-import telebot
 from anon_bot_helper import *
 from anon_bot_templates import *
+from telebot import telebot
 from telebot.storage import StateMemoryStorage
 from telebot.handler_backends import StatesGroup, State
+
+import logging
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    datefmt='%Y/%m/%d %H:%M:%S',
+                    handlers=[
+                        logging.FileHandler('output.log'),
+                        logging.StreamHandler()
+                    ])
+
+
+class States(StatesGroup):
+    user_to = State()
+    user_from = State()
+    is_ready_to_send_message = State()
 
 
 def main():
     if 'get_your_valentines_bot_token' in os.environ:
         token = os.environ['get_your_valentines_bot_token']
     else:
-        print('token not found')
+        logging.error('token not found')
         sys.exit(0)
 
     bot = telebot.TeleBot(token, state_storage=StateMemoryStorage())
-
-    class States(StatesGroup):
-        user_to = State()
-        user_from = State()
-        is_ready_to_send_message = State()
 
     @bot.message_handler(commands=['start'],
                          func=lambda msg: len(msg.text.split()) == 1)
@@ -41,18 +52,18 @@ def main():
                          func=lambda msg: bot.get_state(msg.from_user.id, msg.chat.id))
     def sendText(message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            print(data)
+            logging.info(f"{message.content_type.upper()} | {data['user_from']} -> {data['user_to']}")
             saveMessageText(message, data['user_from'], data['user_to'])
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
-            bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
+            bot.send_message(data['user_to'], templateMessageToWithText(message), parse_mode='Markdown')
         bot.delete_state(message.from_user.id, message.chat.id)
 
     @bot.message_handler(content_types=['sticker'],
                          func=lambda msg: bot.get_state(msg.from_user.id, msg.chat.id))
     def sendSticker(message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            print(data)
+            logging.info(f"{message.content_type.upper()} | {data['user_from']} -> {data['user_to']}")
             saveMessageSticker(message, data['user_from'], data['user_to'])
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
@@ -64,7 +75,7 @@ def main():
                          func=lambda msg: bot.get_state(msg.from_user.id, msg.chat.id))
     def sendPhoto(message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            print(data)
+            logging.info(f"{message.content_type.upper()} | {data['user_from']} -> {data['user_to']}")
             saveMessagePhoto(message, data['user_from'], data['user_to'])
 
             file_id = message.photo[-1].file_id
@@ -85,7 +96,7 @@ def main():
                          func=lambda msg: bot.get_state(msg.from_user.id, msg.chat.id))
     def sendVideo(message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            print(data)
+            logging.info(f"{message.content_type.upper()} | {data['user_from']} -> {data['user_to']}")
             saveMessageVideo(message, data['user_from'], data['user_to'])
 
             file_id = message.video.file_id
@@ -106,7 +117,7 @@ def main():
                          func=lambda msg: bot.get_state(msg.from_user.id, msg.chat.id))
     def sendVoice(message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            print(data)
+            logging.info(f"{message.content_type.upper()} | {data['user_from']} -> {data['user_to']}")
             saveMessageVoice(message, data['user_from'], data['user_to'])
 
             file_id = message.voice.file_id
@@ -124,7 +135,7 @@ def main():
                          func=lambda msg: bot.get_state(msg.from_user.id, msg.chat.id))
     def sendVideoNote(message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            print(data)
+            logging.info(f"{message.content_type.upper()} | {data['user_from']} -> {data['user_to']}")
             saveMessageVideoNote(message, data['user_from'], data['user_to'])
 
             file_id = message.video_note.file_id
