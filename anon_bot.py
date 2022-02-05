@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y/%m/%d %H:%M:%S',
                     handlers=[
-                        logging.FileHandler('output.log'),
+                        logging.FileHandler('anon_output.log'),
                         logging.StreamHandler()
                     ])
 
@@ -31,27 +31,33 @@ def main():
 
     bot = telebot.TeleBot(token, state_storage=StateMemoryStorage())
     bot.set_my_commands([
+        telebot.types.BotCommand('/new_message', 'New message👉'),
         telebot.types.BotCommand('/stats', 'My stats📈'),
         telebot.types.BotCommand('/deanon', 'Deanon🔎'),
-        telebot.types.BotCommand('/referral', 'Referral program🚀'),
-        telebot.types.BotCommand('/incoming', 'Incoming valentines💕')
+        telebot.types.BotCommand('/incoming', 'My valentines💕')
     ])
+
+    @bot.message_handler(commands=['new_message'])
+    def newMessage(message):
+        id_to = getLatestUserToId(message.from_user.id)
+        bot.send_message(message.chat.id, templateMessageNewMessage())
+        bot.set_state(message.from_user.id, States.is_ready_to_send_message, message.chat.id)
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+            data['user_from'] = int(message.chat.id)
+            data['user_to'] = int(id_to)
 
     @bot.message_handler(commands=['stats'])
     def getDeanonLink(message):
         data = {
             'incoming': countIncomingMessagesByUserId(message.from_user.id),
-            'outcoming': countOutcomingMessagesByUserId(message.from_user.id)
+            'outcoming': countOutcomingMessagesByUserId(message.from_user.id),
+            'balance': getBalanceByUserId(message.from_user.id)
         }
         bot.send_message(message.chat.id, templateMessageGetStats(data), parse_mode='Markdown')
 
     @bot.message_handler(commands=['deanon'])
     def getDeanonLink(message):
         bot.send_message(message.chat.id, templateMessageDeanonLink(), parse_mode='Markdown')
-
-    @bot.message_handler(commands=['referral'])
-    def getReferralLink(message):
-        bot.send_message(message.chat.id, templateMessageReferralLink(message))
 
     @bot.message_handler(commands=['incoming'])
     def getReferralLink(message):
@@ -111,9 +117,6 @@ def main():
             with open(f'media/{file_id}.jpg', 'wb') as photo:
                 photo.write(file)
 
-            if not message.caption:
-                message.caption = ''
-
             bot.send_message(data['user_from'], templateMessageFrom(message))
             bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
             bot.send_photo(data['user_to'], message.photo[-1].file_id)
@@ -131,9 +134,6 @@ def main():
             file = bot.download_file(file_info.file_path)
             with open(f'media/{file_id}.mp4', 'wb') as video:
                 video.write(file)
-
-            if not message.caption:
-                message.caption = ''
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
             bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
