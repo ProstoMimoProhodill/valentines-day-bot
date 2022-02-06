@@ -9,10 +9,19 @@ def templateMessageSuccessfulPayment() -> str:
 def templateMessageReferralLink(message) -> str:
     return f'Твоя реферальная ссылка:\n' \
            f'\n' \
-           f't.me/{deanon_bot_url}?referral={message.chat.id}\n' \
+           f't.me/{deanon_bot_url}?start={message.chat.id}-referral\n' \
            f'\n' \
            f'Отправь её своим друзьям и у тебя пополнится баланс❤\n' \
            f'Отслеживать свой баланс можно в Menu->My stats📈\n'
+
+
+def templateMessageActivateReferralLink():
+    return f'Ссылка активирована!\n'
+
+
+def templateMessageActivateReferralLinkUserFrom():
+    return f'Кто-то активировал твою ссылку!\n'
+
 
 def templateMessageShowRates(rates, markup):
     message = '_Доступные тарифы_: \n\n'

@@ -18,7 +18,10 @@ logging.basicConfig(level=logging.INFO,
 
 
 class States(StatesGroup):
-    user = State()
+    id_user = State()
+    id_rate = State()
+    price = State()
+    concurrency = State()
 
 
 def main():
@@ -33,7 +36,8 @@ def main():
         telebot.types.BotCommand('/stats', 'My stats📈')
     ])
 
-    @bot.message_handler(commands=['start'])
+    @bot.message_handler(commands=['start'],
+                         func=lambda msg: len(msg.text.split()) == 1)
     def start(message):
         saveUser(message)
         rates = getRates()
@@ -43,22 +47,50 @@ def main():
                          parse_mode='Markdown',
                          reply_markup=markup)
 
-    @bot.message_handler(commands=['start'])
+    @bot.message_handler(commands=['start'],
+                         func=lambda msg: msg.text.split()[1].split('-')[1] == 'referral')
     def activateReferralLink(message):
-        # TODO
-        pass
+        saveUser(message)
+        id_user = int(message.from_user.id)
+        id_user_from = int(message.text.split()[1].split('-')[0])
+        if id_user != id_user_from:
+            friend = getFriend(id_user_from, id_user)
+            if friend:
+                return
+            bot.send_message(id_user, templateMessageActivateReferralLink())
+            bot.send_message(id_user_from, templateMessageActivateReferralLinkUserFrom())
+            friend_count = int(getFriendCountByUserId(id_user_from))
+            setFriendCountByUserId(id_user_from, friend_count + 1)
+            saveFriend(id_user_from, id_user)
 
     @bot.callback_query_handler(func=lambda call: True)
     def selectedRate(call):
         bot.answer_callback_query(call.id)
 
-        id_rate = call.data
+        id_rate = int(call.data)
         rate = getRateById(id_rate)
 
         if rate.concurrency == 'RUB':
             payment(call.message.chat.id, 'Оплата', rate.description, rate.price)
         elif rate.concurrency == 'FRIEND':
-            bot.send_message(call.message.chat.id, templateMessageReferralLink(call.message))
+            friend_count = int(getFriendCountByUserId(call.message.chat.id))
+            price = int(rate.price)
+            if friend_count < price:
+                bot.send_message(call.message.chat.id, templateMessageReferralLink(call.message))
+            else:
+                setRateByUserId(call.message.chat.id, id_rate)
+                user_balance = getBalanceByUserId(call.message.chat.id)
+                setBalanceByUserId(call.message.chat.id, user_balance + rate.full_balance)
+                setFriendCountByUserId(call.message.chat.id, friend_count - price)
+                savePayment(call.message.chat.id, id_rate, rate.price, rate.concurrency)
+                bot.send_message(call.message.chat.id, templateMessageSuccessfulPayment())
+
+        bot.set_state(call.message.chat.id, States.id_user, call.message.chat.id)
+        with bot.retrieve_data(call.message.chat.id, call.message.chat.id) as data:
+            data['id_user'] = int(call.message.chat.id)
+            data['id_rate'] = int(id_rate)
+            data['price'] = rate.price
+            data['concurrency'] = rate.concurrency
 
     def payment(chat_id, title, description, price):
         provider_token = '381764678:TEST:33280'
@@ -71,8 +103,7 @@ def main():
                          start_parameter='test',
                          prices=[
                              types.LabeledPrice(label='Руб', amount=price * 100)
-                         ]
-                         )
+                         ])
 
     @bot.pre_checkout_query_handler(func=lambda call: True)
     def confirmPayment(message):
@@ -80,6 +111,13 @@ def main():
 
     @bot.message_handler(content_types=['successful_payment'])
     def successfulPayment(message):
+        with bot.retrieve_data(message.chat.id, message.chat.id) as data:
+            setRateByUserId(data['id_user'], data['id_rate'])
+            user_balance = getBalanceByUserId(message.chat.id)
+            full_balance = getRateById(data['id_rate']).full_balance
+            setBalanceByUserId(data['id_user'], user_balance + full_balance)
+            savePayment(data['id_user'], data['id_rate'], data['price'], data['concurrency'])
+        bot.delete_state(message.from_user.id, message.chat.id)
         bot.send_message(message.chat.id, templateMessageSuccessfulPayment())
 
     bot.infinity_polling()

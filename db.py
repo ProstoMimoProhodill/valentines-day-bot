@@ -36,9 +36,17 @@ class User(Base):
     last_name = Column(String, nullable=True)
     username = Column(String, nullable=False)
     id_rate = Column(Integer, ForeignKey('rates.id'), nullable=False)
+    # balance - сколько можешь задеанонить посланий
     balance = Column(Integer, default=0, nullable=False)
+    friend_count = Column(Integer, default=0, nullable=False)
 
     rate = relationship('Rate', foreign_keys="User.id_rate", uselist=False)
+
+
+class Friend(Base):
+    __tablename__ = 'friends'
+    id_user = Column(Integer, primary_key=True, autoincrement=False)
+    id_friend = Column(Integer, primary_key=True, autoincrement=False)
 
 
 class Rate(Base):
@@ -46,6 +54,7 @@ class Rate(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     price = Column(Integer, nullable=True)
     concurrency = Column(String, nullable=True)
+    full_balance = Column(Integer, nullable=True)
     description = Column(String, nullable=False)
 
 
@@ -53,21 +62,23 @@ class Payment(Base):
     __tablename__ = 'payments'
     id = Column(Integer, primary_key=True, autoincrement=True)
     id_user = Column(Integer, ForeignKey('users.id'), nullable=False)
+    id_rate = Column(Integer, ForeignKey('rates.id'), nullable=False)
     price = Column(Integer, nullable=False)
     concurrency = Column(String, nullable=False)
     date = Column(DateTime, default=datetime.now())
 
     user = relationship('User', foreign_keys="Payment.id_user", uselist=False)
+    rate = relationship('Rate', foreign_keys="Payment.id_rate", uselist=False)
 
 
 def generateRates(s):
     rates = [
-        Rate(price=None, concurrency=None, description='Тариф не выбран'),
-        Rate(price=79, concurrency='RUB', description='Деанон 5ти посланий'),
-        Rate(price=150, concurrency='RUB', description='Безлимитный деанон'),
-        Rate(price=3, concurrency='FRIEND', description='Деанон 3х посланий'),
-        Rate(price=5, concurrency='FRIEND', description='Деанон 5х посланий'),
-        Rate(price=10, concurrency='FRIEND', description='Безлимитный деанон')
+        Rate(price=None, concurrency=None, full_balance=None, description='Тариф не выбран'),
+        Rate(price=79, concurrency='RUB', full_balance=5, description='Деанон 5ти посланий'),
+        Rate(price=150, concurrency='RUB', full_balance=10000, description='Безлимитный деанон'),
+        Rate(price=3, concurrency='FRIEND', full_balance=3, description='Деанон 3х посланий'),
+        Rate(price=5, concurrency='FRIEND', full_balance=5, description='Деанон 5х посланий'),
+        Rate(price=10, concurrency='FRIEND', full_balance=10000, description='Безлимитный деанон')
     ]
     s.add_all(rates)
     s.commit()
@@ -93,7 +104,7 @@ def generateMessages(s):
 
 def generatePayments(s):
     payments = [
-        Payment(id_user=5641561, price=250, concurrency='RUB')
+        Payment(id_user=5641561, id_rate=2, price=250, concurrency='RUB')
     ]
     s.add_all(payments)
     s.commit()
