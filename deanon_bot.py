@@ -79,7 +79,7 @@ def main():
                 setBalanceByUserId(call.message.chat.id, user_balance + rate.full_balance)
                 setFriendCountByUserId(call.message.chat.id, friend_count - price)
                 savePayment(call.message.chat.id, id_rate, rate.price, rate.concurrency)
-                bot.send_message(call.message.chat.id, templateMessageSuccessfulPayment())
+                bot.send_message(call.message.chat.id, templateMessageSuccessfulPayment(user_balance + rate.full_balance), parse_mode='Markdown')
 
         bot.set_state(call.message.chat.id, States.id_user, call.message.chat.id)
         with bot.retrieve_data(call.message.chat.id, call.message.chat.id) as data:
@@ -114,7 +114,7 @@ def main():
             setBalanceByUserId(data['id_user'], user_balance + full_balance)
             savePayment(data['id_user'], data['id_rate'], data['price'], data['concurrency'])
         bot.delete_state(message.from_user.id, message.chat.id)
-        bot.send_message(message.chat.id, templateMessageSuccessfulPayment())
+        bot.send_message(message.chat.id, templateMessageSuccessfulPayment(user_balance + full_balance), parse_mode='Markdown')
 
     @bot.message_handler(content_types=['text'],
                          func=lambda msg: msg.forward_from.username == anon_bot_url)

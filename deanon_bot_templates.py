@@ -2,8 +2,8 @@ from telebot import types
 from config import deanon_bot_url
 
 
-def templateMessageSuccessfulPayment() -> str:
-    return f'Оплата прошла успешно!\n'
+def templateMessageSuccessfulPayment(balance) -> str:
+    return f'Оплата прошла успешно!\n*Твой Баланс:  {balance}*  ❤'
 
 
 def templateMessageReferralLink(message) -> str:
