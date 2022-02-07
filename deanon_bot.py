@@ -1,6 +1,8 @@
 import sys
+import filecmp
 from deanon_bot_helper import *
 from deanon_bot_templates import *
+from config import anon_bot_url
 from telebot import types
 from telebot import telebot
 from telebot.storage import StateMemoryStorage
@@ -40,12 +42,7 @@ def main():
                          func=lambda msg: len(msg.text.split()) == 1)
     def start(message):
         saveUser(message)
-        rates = getRates()
-        msg, markup = templateMessageShowRates(rates, types.InlineKeyboardMarkup())
-        bot.send_message(message.chat.id,
-                         msg,
-                         parse_mode='Markdown',
-                         reply_markup=markup)
+        showRates(message)
 
     @bot.message_handler(commands=['start'],
                          func=lambda msg: msg.text.split()[1].split('-')[1] == 'referral')
@@ -119,6 +116,199 @@ def main():
             savePayment(data['id_user'], data['id_rate'], data['price'], data['concurrency'])
         bot.delete_state(message.from_user.id, message.chat.id)
         bot.send_message(message.chat.id, templateMessageSuccessfulPayment())
+
+    @bot.message_handler(content_types=['text'],
+                         func=lambda msg: msg.forward_from.username == anon_bot_url)
+    def deanonTextMessage(message):
+        user_balance = getBalanceByUserId(message.chat.id)
+        if user_balance <= 0:
+            showRates(message)
+            return
+
+        id_user_from = getUserFrom(message.chat.id, message.content_type, message.text)
+        user = getUserById(id_user_from)
+
+        setBalanceByUserId(message.chat.id, user_balance - 1)
+        bot.reply_to(message, templateMessageDeanon(user_balance - 1, user.username), parse_mode='Markdown')
+
+    @bot.message_handler(content_types=['photo'],
+                         func=lambda msg: msg.forward_from.username == anon_bot_url)
+    def deanonPhotoMessage(message):
+        user_balance = getBalanceByUserId(message.chat.id)
+        if user_balance <= 0:
+            showRates(message)
+            return
+
+        # file from reply
+        file_id = message.photo[-1].file_id
+        file_info = bot.get_file(file_id)
+        file = bot.download_file(file_info.file_path)
+
+        # get messages
+        messages = getMessages(message.chat.id, message.content_type)
+
+        # compare files and find our file
+        id_user_from = None
+        for msg in messages:
+            if not msg.media:
+                continue
+            with open(f'media/{msg.media}.jpg', 'rb') as file_db:
+                file_db_byte_array = file_db.read()
+                if file_db_byte_array == file:
+                    id_user_from = msg.id_from
+                    break
+
+        # find user and reply userinfo
+        if not id_user_from:
+            return
+        user = getUserById(id_user_from)
+        setBalanceByUserId(message.chat.id, user_balance - 1)
+        bot.reply_to(message, templateMessageDeanon(user_balance - 1, user.username), parse_mode='Markdown')
+
+    @bot.message_handler(content_types=['video'],
+                         func=lambda msg: msg.forward_from.username == anon_bot_url)
+    def deanonVideoMessage(message):
+        user_balance = getBalanceByUserId(message.chat.id)
+        if user_balance <= 0:
+            showRates(message)
+            return
+
+        # file from reply
+        file_id = message.video.file_id
+        file_info = bot.get_file(file_id)
+        file = bot.download_file(file_info.file_path)
+
+        # get messages
+        messages = getMessages(message.chat.id, message.content_type)
+
+        # compare files and find our file
+        id_user_from = None
+        for msg in messages:
+            if not msg.media:
+                continue
+            with open(f'media/{msg.media}.mp4', 'rb') as file_db:
+                file_db_byte_array = file_db.read()
+                if file_db_byte_array == file:
+                    id_user_from = msg.id_from
+                    break
+
+        # find user and reply userinfo
+        if not id_user_from:
+            return
+        user = getUserById(id_user_from)
+        setBalanceByUserId(message.chat.id, user_balance - 1)
+        bot.reply_to(message, templateMessageDeanon(user_balance - 1, user.username), parse_mode='Markdown')
+
+    @bot.message_handler(content_types=['video_note'],
+                         func=lambda msg: msg.forward_from.username == anon_bot_url)
+    def deanonVideoNoteMessage(message):
+        user_balance = getBalanceByUserId(message.chat.id)
+        if user_balance <= 0:
+            showRates(message)
+            return
+
+        # file from reply
+        file_id = message.video_note.file_id
+        file_info = bot.get_file(file_id)
+        file = bot.download_file(file_info.file_path)
+
+        # get messages
+        messages = getMessages(message.chat.id, message.content_type)
+
+        # compare files and find our file
+        id_user_from = None
+        for msg in messages:
+            if not msg.media:
+                continue
+            with open(f'media/{msg.media}.mp4', 'rb') as file_db:
+                file_db_byte_array = file_db.read()
+                if file_db_byte_array == file:
+                    id_user_from = msg.id_from
+                    break
+
+        # find user and reply userinfo
+        if not id_user_from:
+            return
+        user = getUserById(id_user_from)
+        setBalanceByUserId(message.chat.id, user_balance - 1)
+        bot.reply_to(message, templateMessageDeanon(user_balance - 1, user.username), parse_mode='Markdown')
+
+    @bot.message_handler(content_types=['voice'],
+                         func=lambda msg: msg.forward_from.username == anon_bot_url)
+    def deanonVoiceMessage(message):
+        user_balance = getBalanceByUserId(message.chat.id)
+        if user_balance <= 0:
+            showRates(message)
+            return
+
+        # file from reply
+        file_id = message.voice.file_id
+        file_info = bot.get_file(file_id)
+        file = bot.download_file(file_info.file_path)
+
+        # get messages
+        messages = getMessages(message.chat.id, message.content_type)
+
+        # compare files and find our file
+        id_user_from = None
+        for msg in messages:
+            if not msg.media:
+                continue
+            with open(f'media/{msg.media}.mp3', 'rb') as file_db:
+                file_db_byte_array = file_db.read()
+                if file_db_byte_array == file:
+                    id_user_from = msg.id_from
+                    break
+
+        # find user and reply userinfo
+        if not id_user_from:
+            return
+        user = getUserById(id_user_from)
+        setBalanceByUserId(message.chat.id, user_balance - 1)
+        bot.reply_to(message, templateMessageDeanon(user_balance - 1, user.username), parse_mode='Markdown')
+
+    @bot.message_handler(content_types=['sticker'],
+                         func=lambda msg: msg.forward_from.username == anon_bot_url)
+    def deanonStickerMessage(message):
+        user_balance = getBalanceByUserId(message.chat.id)
+        if user_balance <= 0:
+            showRates(message)
+            return
+
+        # file from reply
+        file_id = message.sticker.thumb.file_id
+        file_info = bot.get_file(file_id)
+        file = bot.download_file(file_info.file_path)
+
+        # get messages
+        messages = getMessages(message.chat.id, message.content_type)
+
+        # compare files and find our file
+        id_user_from = None
+        for msg in messages:
+            if not msg.media:
+                continue
+            with open(f'media/{msg.media}.jpg', 'rb') as file_db:
+                file_db_byte_array = file_db.read()
+                if file_db_byte_array == file:
+                    id_user_from = msg.id_from
+                    break
+
+        # find user and reply userinfo
+        if not id_user_from:
+            return
+        user = getUserById(id_user_from)
+        setBalanceByUserId(message.chat.id, user_balance - 1)
+        bot.reply_to(message, templateMessageDeanon(user_balance - 1, user.username), parse_mode='Markdown')
+
+    def showRates(message):
+        rates = getRates()
+        user_balance = getBalanceByUserId(message.chat.id)
+        msg, markup = templateMessageShowRates(user_balance, rates, types.InlineKeyboardMarkup())
+        bot.send_message(message.chat.id,
+                         msg,
+                         parse_mode='Markdown',
+                         reply_markup=markup)
 
     bot.infinity_polling()
 

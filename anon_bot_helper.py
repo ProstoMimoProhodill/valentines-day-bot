@@ -21,7 +21,7 @@ def saveMessageText(message, user_from, user_to):
                      content_type='text',
                      text=message.text,
                      media=None,
-                     is_delivered=1
+                     is_opened=0
                      )
     db.session.add(msg)
     db.session.commit()
@@ -32,8 +32,8 @@ def saveMessageSticker(message, user_from, user_to):
                      id_to=user_to,
                      content_type='sticker',
                      text=None,
-                     media=message.sticker.file_id,
-                     is_delivered=1
+                     media=message.sticker.thumb.file_id,
+                     is_opened=0
                      )
     db.session.add(msg)
     db.session.commit()
@@ -45,7 +45,7 @@ def saveMessagePhoto(message, user_from, user_to):
                      content_type='photo',
                      text=message.caption,
                      media=message.photo[-1].file_id,
-                     is_delivered=1
+                     is_opened=0
                      )
     db.session.add(msg)
     db.session.commit()
@@ -57,7 +57,7 @@ def saveMessageVideo(message, user_from, user_to):
                      content_type='video',
                      text=message.caption,
                      media=message.video.file_id,
-                     is_delivered=1
+                     is_opened=0
                      )
     db.session.add(msg)
     db.session.commit()
@@ -69,7 +69,7 @@ def saveMessageVoice(message, user_from, user_to):
                      content_type='voice',
                      text=None,
                      media=message.voice.file_id,
-                     is_delivered=1
+                     is_opened=0
                      )
     db.session.add(msg)
     db.session.commit()
@@ -81,7 +81,7 @@ def saveMessageVideoNote(message, user_from, user_to):
                      content_type='video_note',
                      text=None,
                      media=message.video_note.file_id,
-                     is_delivered=1
+                     is_opened=0
                      )
     db.session.add(msg)
     db.session.commit()

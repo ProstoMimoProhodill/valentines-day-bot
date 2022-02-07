@@ -12,7 +12,7 @@ def templateMessageReferralLink(message) -> str:
            f't.me/{deanon_bot_url}?start={message.chat.id}-referral\n' \
            f'\n' \
            f'Отправь её своим друзьям и у тебя пополнится баланс❤\n' \
-           f'Отслеживать свой баланс можно в Menu->My stats📈\n'
+           f'Посмотреть баланс можно в Menu->My stats📈\n'
 
 
 def templateMessageActivateReferralLink():
@@ -23,8 +23,8 @@ def templateMessageActivateReferralLinkUserFrom():
     return f'Кто-то активировал твою ссылку!\n'
 
 
-def templateMessageShowRates(rates, markup):
-    message = '_Доступные тарифы_: \n\n'
+def templateMessageShowRates(balance, rates, markup):
+    message = f'*Твой Баланс:  {balance}*  ❤\nДоступные тарифы: \n\n'
     for rate in rates:
         msg = ''
         callback_data = rate.id
@@ -38,3 +38,7 @@ def templateMessageShowRates(rates, markup):
         button = types.InlineKeyboardButton(msg, callback_data=callback_data)
         markup.row(button)
     return message, markup
+
+
+def templateMessageDeanon(balance, username):
+    return f'*Твой Баланс:  {balance}*  ❤\nПослание от @{username}\n'

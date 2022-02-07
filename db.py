@@ -22,7 +22,7 @@ class Message(Base):
     content_type = Column(String, nullable=False)
     text = Column(Text, nullable=True)
     media = Column(String, nullable=True)
-    is_delivered = Column(Boolean, nullable=False)
+    is_opened = Column(Boolean, nullable=False)
     date = Column(DateTime, default=datetime.now())
 
     user_from = relationship('User', foreign_keys=[id_from], uselist=False)
@@ -95,8 +95,8 @@ def generateUsers(s):
 
 def generateMessages(s):
     messages = [
-        Message(id_from=5641561, id_to=1561515, content_type='text', text='Андрей Даше', media=None, is_delivered=1),
-        Message(id_from=1561515, id_to=5641561, content_type='text', text='Даша Андрею', media=None, is_delivered=1)
+        Message(id_from=5641561, id_to=1561515, content_type='text', text='Андрей Даше', media=None, is_opened=1),
+        Message(id_from=1561515, id_to=5641561, content_type='text', text='Даша Андрею', media=None, is_opened=1)
     ]
     s.add_all(messages)
     s.commit()
@@ -122,7 +122,7 @@ def showUsers(s):
 
 def showMessages(s):
     for msg in s.query(Message).all():
-        print(f'{msg.id} {msg.id_from} {msg.id_to} {msg.text} {msg.media} {msg.is_delivered} {msg.date}')
+        print(f'{msg.id} {msg.id_from} {msg.id_to} {msg.text} {msg.media} {msg.is_opened} {msg.date}')
 
 
 def showPayments(s):

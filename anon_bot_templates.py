@@ -3,7 +3,7 @@ from config import anon_bot_url
 def templateMessageGetStats(data) -> str:
     return f'👉Полученные: {data["incoming"]}\n' \
            f'👈Отправленные: {data["outcoming"]}\n' \
-           f'Баланс: {data["balance"]}\n'
+           f'❤Баланс: {data["balance"]}\n'
 
 
 def templateMessageReferralLink(message) -> str:
@@ -33,17 +33,15 @@ def templateMessageFrom(message) -> str:
 
 
 def templateMessageTo() -> str:
-    return f'[У вас новое признание:](http://t.me/deanon_your_valentines_bot)\n '
+    return f'[У вас новое признание:](http://t.me/deanon_your_valentines_bot)'
 
 
 def templateMessageToWithText(message) -> str:
-    return f'[У вас новое признание:](http://t.me/deanon_your_valentines_bot)\n\n*{message.text}* '
+    return f'*{message.text}* '
 
 
 def templateMessageToWithCaption(message) -> str:
-    if not message.caption:
-        message.caption = ''
-    return f'[У вас новое признание:](http://t.me/deanon_your_valentines_bot)\n\n*{message.caption}* '
+    return f'*{message.caption}* '
 
 
 def templateMessageStartByLink() -> str:

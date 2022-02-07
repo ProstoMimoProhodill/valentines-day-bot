@@ -61,7 +61,6 @@ def main():
 
     @bot.message_handler(commands=['incoming'])
     def getReferralLink(message):
-        # TODO
         bot.send_message(message.chat.id, templateMessageReferralLink(message))
 
     @bot.message_handler(commands=['start'],
@@ -89,6 +88,7 @@ def main():
             saveMessageText(message, data['user_from'], data['user_to'])
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
+            bot.send_message(data['user_to'], templateMessageTo(), parse_mode='Markdown')
             bot.send_message(data['user_to'], templateMessageToWithText(message), parse_mode='Markdown')
         bot.delete_state(message.from_user.id, message.chat.id)
 
@@ -98,6 +98,12 @@ def main():
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             logging.info(f"{message.content_type.upper()} | {data['user_from']} -> {data['user_to']}")
             saveMessageSticker(message, data['user_from'], data['user_to'])
+
+            file_id = message.sticker.thumb.file_id
+            file_info = bot.get_file(file_id)
+            file = bot.download_file(file_info.file_path)
+            with open(f'media/{file_id}.jpg', 'wb') as sticker:
+                sticker.write(file)
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
             bot.send_message(data['user_to'], templateMessageTo(), parse_mode='Markdown')
@@ -118,7 +124,8 @@ def main():
                 photo.write(file)
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
-            bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
+            if message.caption:
+                bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
             bot.send_photo(data['user_to'], message.photo[-1].file_id)
         bot.delete_state(message.from_user.id, message.chat.id)
 
@@ -136,7 +143,8 @@ def main():
                 video.write(file)
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
-            bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
+            if message.caption:
+                bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
             bot.send_video(data['user_to'], message.video.file_id)
         bot.delete_state(message.from_user.id, message.chat.id)
 
