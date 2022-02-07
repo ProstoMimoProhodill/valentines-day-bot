@@ -75,7 +75,6 @@ def getFriend(id_user, id_friend):
 def getUserFrom(id_user_to, content_type, text=None):
     if text:
         message = db.session.query(Message).filter_by(id_to=id_user_to,
-                                                      content_type=content_type,
                                                       text=text).first()
     else:
         message = db.session.query(Message).filter_by(id_to=id_user_to,
@@ -86,12 +85,3 @@ def getUserFrom(id_user_to, content_type, text=None):
 def getMessages(id_user_to, content_type):
     return db.session.query(Message).filter_by(id_to=id_user_to, content_type=content_type).all()
 
-
-# def getUserFromMedia(id_user_to, content_type, media):
-#     message = db.session.query(Message).filter_by(id_to=id_user_to,
-#                                                   content_type=content_type,
-#                                                   media=media).first()
-#     return message.id_from
-
-
-# def getUserByIdTo()

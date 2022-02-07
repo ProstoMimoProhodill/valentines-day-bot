@@ -31,10 +31,12 @@ def main():
 
     bot = telebot.TeleBot(token, state_storage=StateMemoryStorage())
     bot.set_my_commands([
+
         telebot.types.BotCommand('/new_message', 'New message👉'),
         telebot.types.BotCommand('/stats', 'My stats📈'),
         telebot.types.BotCommand('/deanon', 'Deanon🔎'),
-        telebot.types.BotCommand('/incoming', 'My valentines💕')
+        telebot.types.BotCommand('/start', 'Start💕'),
+        telebot.types.BotCommand('/help', 'Help💕')
     ])
 
     @bot.message_handler(commands=['new_message'])
@@ -58,10 +60,6 @@ def main():
     @bot.message_handler(commands=['deanon'])
     def getDeanonLink(message):
         bot.send_message(message.chat.id, templateMessageDeanonLink(), parse_mode='Markdown')
-
-    @bot.message_handler(commands=['incoming'])
-    def getReferralLink(message):
-        bot.send_message(message.chat.id, templateMessageReferralLink(message))
 
     @bot.message_handler(commands=['start'],
                          func=lambda msg: len(msg.text.split()) == 1)
@@ -124,6 +122,7 @@ def main():
                 photo.write(file)
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
+            bot.send_message(data['user_to'], templateMessageTo(), parse_mode='Markdown')
             if message.caption:
                 bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
             bot.send_photo(data['user_to'], message.photo[-1].file_id)
@@ -143,6 +142,7 @@ def main():
                 video.write(file)
 
             bot.send_message(data['user_from'], templateMessageFrom(message))
+            bot.send_message(data['user_to'], templateMessageTo(), parse_mode='Markdown')
             if message.caption:
                 bot.send_message(data['user_to'], templateMessageToWithCaption(message), parse_mode='Markdown')
             bot.send_video(data['user_to'], message.video.file_id)

@@ -1,5 +1,4 @@
 import sys
-import filecmp
 from deanon_bot_helper import *
 from deanon_bot_templates import *
 from config import anon_bot_url
@@ -35,7 +34,7 @@ def main():
 
     bot = telebot.TeleBot(token, state_storage=StateMemoryStorage())
     bot.set_my_commands([
-        telebot.types.BotCommand('/stats', 'My stats📈')
+        telebot.types.BotCommand('/start', 'Start💕')
     ])
 
     @bot.message_handler(commands=['start'],
@@ -126,6 +125,8 @@ def main():
             return
 
         id_user_from = getUserFrom(message.chat.id, message.content_type, message.text)
+        if not id_user_from:
+            return
         user = getUserById(id_user_from)
 
         setBalanceByUserId(message.chat.id, user_balance - 1)
